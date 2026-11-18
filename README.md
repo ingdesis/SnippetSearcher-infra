@@ -4,7 +4,7 @@ Repo de **infraestructura y deploy** de Snippet Searcher. Acá vive la configura
 
 No tiene código de ningún servicio. Cada servicio vive en su propio repo y publica su imagen Docker; este repo solo dice qué imágenes se levantan, con qué configuración y dónde.
 
-La arquitectura, las user stories y las decisiones técnicas del sistema viven en el repo [SnippetSearcher](https://github.com/MartinaCousido/SnippetSearcher), que es la fuente de verdad.
+La arquitectura, las user stories y las decisiones técnicas del sistema viven en el repo [SnippetSearcher](https://github.com/ingdesis/SnippetSearcher), que es la fuente de verdad.
 
 ## Qué hace
 
@@ -53,12 +53,12 @@ Coincide con el flujo de trabajo de los repos: lo que se prueba en dev llega a p
 | `proxy` | — (imagen oficial `nginx:1.30-alpine`) | ✅ En el stack. Reverse proxy: **único servicio con puertos públicos** (`80` y `443`). Ver [Reverse proxy](#reverse-proxy) y [HTTPS](#https) |
 | `certbot` | — (imagen oficial `certbot/certbot:v5.8.0`) | ✅ En el stack. Consigue y renueva el certificado de HTTPS. Sin puertos. Ver [HTTPS](#https) |
 | `logs` | — (imagen `newrelic/newrelic-fluentbit-output:3.11.0`) | ✅ En el stack. Manda a New Relic los logs de los contenedores sin agente propio. Uno por VM (`mode: global`). Sin puertos. Ver [New Relic](#new-relic) |
-| `ui` | [SnippetSearcher-ui](https://github.com/MartinaCousido/SnippetSearcher-ui) | ✅ En el stack (`ghcr.io/martinacousido/snippet-ui`). Sin puertos: el proxy le pasa `/`. La imagen la publica el repo de la UI ([SnippetSearcher-ui#10](https://github.com/MartinaCousido/SnippetSearcher-ui/issues/10)) |
-| `snippet-service` | [SnippetSearcher](https://github.com/MartinaCousido/SnippetSearcher) | ✅ En el stack. Sin puertos: el proxy le pasa `/api/` |
+| `ui` | [SnippetSearcher-ui](https://github.com/ingdesis/SnippetSearcher-ui) | ✅ En el stack (`ghcr.io/ingdesis/snippet-ui`). Sin puertos: el proxy le pasa `/`. La imagen la publica el repo de la UI ([SnippetSearcher-ui#10](https://github.com/ingdesis/SnippetSearcher-ui/issues/10)) |
+| `snippet-service` | [SnippetSearcher](https://github.com/ingdesis/SnippetSearcher) | ✅ En el stack. Sin puertos: el proxy le pasa `/api/` |
 | `snippets-db` | — (imagen oficial `postgres:17`) | ✅ En el stack |
-| `permission-service` | [SnippetPermission](https://github.com/MartinaCousido/SnippetPermission) | ✅ En el stack. Sin puertos: el proxy le pasa `/api/permissions/` |
+| `permission-service` | [SnippetPermission](https://github.com/ingdesis/SnippetPermission) | ✅ En el stack. Sin puertos: el proxy le pasa `/api/permissions/` |
 | `permisos-db` | — (imagen oficial `postgres:17`) | ✅ En el stack |
-| `printscript-service` | [SnippetPrintScript](https://github.com/MartinaCousido/SnippetPrintScript), que usa la librería [PrintScript](https://github.com/MartinaCousido/PrintScript) (`0.3.1`) | ✅ En el stack. Sin puerto público: Snippet Service lo llama en `http://printscript-service:8080` (variable `PRINTSCRIPT_SERVICE_URL`) |
+| `printscript-service` | [SnippetPrintScript](https://github.com/ingdesis/SnippetPrintScript), que usa la librería [PrintScript](https://github.com/ingdesis/PrintScript) (`0.3.1`) | ✅ En el stack. Sin puerto público: Snippet Service lo llama en `http://printscript-service:8080` (variable `PRINTSCRIPT_SERVICE_URL`) |
 | `asset-service` + `azurite` | [asset-service](https://github.com/austral-ingsis/asset-service) de la cátedra (imagen `ghcr.io/austral-ingsis/snippet-asset-service`) y la imagen oficial de Azurite | ✅ En el stack (`main.14` y Azurite `3.37.0`). Sin puertos públicos: Snippet Service lo llama en `http://asset-service:8080` (variable `ASSET_SERVICE_URL`). Los archivos quedan en el volumen `azurite-data` |
 | `redis` | — (imagen oficial `redis:8.2`) | ✅ En el stack. Cola de mensajes (Redis Streams) de Snippet Service, que la encuentra con `SPRING_DATA_REDIS_HOST`. Con `appendonly` y el volumen `redis-data`: los mensajes pendientes sobreviven a un reinicio. Sin puertos públicos |
 
@@ -75,13 +75,13 @@ Coincide con el flujo de trabajo de los repos: lo que se prueba en dev llega a p
 | Tags de las imágenes | ✅ Definido | Dos tags por imagen: el del ambiente y el del commit. Ver [Tags de las imágenes](#tags-de-las-imágenes) |
 | Credenciales de las bases | ✅ Definido | El nombre y el usuario de cada base son fijos en el stack (`snippets` y `permisos`), porque no son secretos. Solo la **contraseña** va por variable. Ver [Variables del stack](#variables-del-stack) |
 | Deploy | ✅ Definido | Automático con GitHub Actions; nunca a mano en la VM |
-| PrintScript | ✅ Definido | Repo propio, [SnippetPrintScript](https://github.com/MartinaCousido/SnippetPrintScript), con el mismo flujo de deploy que los otros servicios. Ver [Servicio de PrintScript](https://github.com/MartinaCousido/SnippetSearcher#decisiones-técnicas) en SnippetSearcher |
-| Asset Service / bucket | ✅ Definido | Lo provee la cátedra: el Asset Service sobre un bucket emulado con **Azurite**. Ver [Snippet Storage](https://github.com/MartinaCousido/SnippetSearcher#decisiones-técnicas) en SnippetSearcher. En el stack desde #14 |
+| PrintScript | ✅ Definido | Repo propio, [SnippetPrintScript](https://github.com/ingdesis/SnippetPrintScript), con el mismo flujo de deploy que los otros servicios. Ver [Servicio de PrintScript](https://github.com/ingdesis/SnippetSearcher#decisiones-técnicas) en SnippetSearcher |
+| Asset Service / bucket | ✅ Definido | Lo provee la cátedra: el Asset Service sobre un bucket emulado con **Azurite**. Ver [Snippet Storage](https://github.com/ingdesis/SnippetSearcher#decisiones-técnicas) en SnippetSearcher. En el stack desde #14 |
 | Reverse proxy | ✅ Definido | **nginx** en los puertos 80 y 443, con la configuración como Swarm `configs`. Ver [Reverse proxy](#reverse-proxy) |
 | HTTPS | ✅ Definido | **Let's Encrypt + DuckDNS**: `snippetsearcher-dev.duckdns.org` y `snippetsearcher-prod.duckdns.org`. El cifrado termina en el `proxy`, en el puerto 443; adentro de la red de Docker se sigue con HTTP. El servicio `certbot` consigue el certificado; la primera vez, nginx arranca con uno **provisorio autofirmado**. Ver [HTTPS](#https) |
-| CORS | ✅ Definido | Snippet Service y Permission Service aceptan solo los origins de la variable `CORS_ALLOWED_ORIGINS`, que se pasa en el stack (ver [Variables del stack](#variables-del-stack)). Dev: el dominio de dev y `http://localhost:5173`. Prod: solo el dominio de prod. Ver [CORS](https://github.com/MartinaCousido/SnippetSearcher#cors) en SnippetSearcher |
+| CORS | ✅ Definido | Snippet Service y Permission Service aceptan solo los origins de la variable `CORS_ALLOWED_ORIGINS`, que se pasa en el stack (ver [Variables del stack](#variables-del-stack)). Dev: el dominio de dev y `http://localhost:5173`. Prod: solo el dominio de prod. Ver [CORS](https://github.com/ingdesis/SnippetSearcher#cors) en SnippetSearcher |
 | Secrets | ✅ Definido | Siete secrets en cada *Environment* de GitHub (`dev` y `prod`). Ver [Secrets](#secrets) |
-| Auth0 | ✅ Definido | Un solo tenant para dev y prod (`dev-eadjutr73y1lgdc5.us.auth0.com`). Sus recursos se crean con **Pulumi**, en la carpeta `auth0/`. Ver [Auth0](#auth0) y las filas **Auth0** y **Roles y permisos** de [Decisiones técnicas](https://github.com/MartinaCousido/SnippetSearcher#decisiones-técnicas) en SnippetSearcher |
+| Auth0 | ✅ Definido | Un solo tenant para dev y prod (`dev-eadjutr73y1lgdc5.us.auth0.com`). Sus recursos se crean con **Pulumi**, en la carpeta `auth0/`. Ver [Auth0](#auth0) y las filas **Auth0** y **Roles y permisos** de [Decisiones técnicas](https://github.com/ingdesis/SnippetSearcher#decisiones-técnicas) en SnippetSearcher |
 
 ### Variables del stack
 
@@ -92,7 +92,7 @@ Coincide con el flujo de trabajo de los repos: lo que se prueba en dev llega a p
 | `TAG` | Tag de las imágenes de los servicios | `dev` o `prod` |
 | `SNIPPETS_DB_PASSWORD` | Contraseña de la base de Snippet Service | — |
 | `PERMISOS_DB_PASSWORD` | Contraseña de la base de Permission Service | — |
-| `CORS_ALLOWED_ORIGINS` | Origins que aceptan Snippet Service y Permission Service (ver [CORS](https://github.com/MartinaCousido/SnippetSearcher#cors)) | dev: `https://snippetsearcher-dev.duckdns.org,http://localhost:5173`. prod: `https://snippetsearcher-prod.duckdns.org` |
+| `CORS_ALLOWED_ORIGINS` | Origins que aceptan Snippet Service y Permission Service (ver [CORS](https://github.com/ingdesis/SnippetSearcher#cors)) | dev: `https://snippetsearcher-dev.duckdns.org,http://localhost:5173`. prod: `https://snippetsearcher-prod.duckdns.org` |
 | `DOMINIO` | Dominio del ambiente: el del certificado y el de la redirección a HTTPS | `snippetsearcher-dev.duckdns.org` o `snippetsearcher-prod.duckdns.org` |
 | `AUTH0_USERS_CLIENT_SECRET` | Secret de la app `snippetsearcher-users-reader`, con la que Snippet Service lee usuarios de Auth0 (módulo User). Es el mismo en dev y prod, pero es secreto | — |
 | `NEW_RELIC_LICENSE_KEY` | License key de New Relic: la usan los agentes de los servicios y el de infraestructura. Es la misma en dev y prod, pero es secreta | — |
@@ -123,8 +123,8 @@ Cada push a `dev` o `main` publica la imagen del servicio con **dos tags a la ve
 
 | Tag | Ejemplo | Para qué sirve |
 |---|---|---|
-| Ambiente | `ghcr.io/martinacousido/snippet-service:dev` o `:prod` | Cada VM pide el tag de su ambiente. Así dev y prod quedan separados: lo que se mergea a `dev` no llega a prod hasta el PR `dev` → `main` |
-| Commit | `ghcr.io/martinacousido/snippet-service:sha-95da21f` | Es único por push. Dice exactamente qué código corre y permite volver a una versión anterior desplegando su `sha-` |
+| Ambiente | `ghcr.io/ingdesis/snippet-service:dev` o `:prod` | Cada VM pide el tag de su ambiente. Así dev y prod quedan separados: lo que se mergea a `dev` no llega a prod hasta el PR `dev` → `main` |
+| Commit | `ghcr.io/ingdesis/snippet-service:sha-95da21f` | Es único por push. Dice exactamente qué código corre y permite volver a una versión anterior desplegando su `sha-` |
 
 No se usa `latest`: no distingue ambientes y no permite saber qué versión está corriendo.
 
@@ -144,13 +144,13 @@ El servicio `proxy` es un **nginx** que recibe todo en los puertos 80 y 443 y le
 - De Permission Service se publica solo **compartir**, que es lo único que usa la UI. Registrar owner, borrar permisos y "¿puede leer o escribir?" los usa Snippet Service por la red interna: si se pudieran llamar desde afuera, un usuario podría, por ejemplo, borrar los permisos de su snippet y dejarlo huérfano. Tampoco se publica el health de los servicios (`/api/actuator`), porque muestra datos internos; adentro de la red y en local sigue igual.
 - La UI tiene una sola `BACKEND_URL` (`/api`, relativa a la página) y queda en la misma dirección que los servicios, así que el navegador no aplica CORS. Igual se configura en cada servicio: ver la fila **CORS** de [Decisiones técnicas](#decisiones-técnicas).
 - Le pasa al servicio los headers `Host`, `X-Forwarded-For` y `X-Forwarded-Proto` (si entró por HTTP o HTTPS). `X-Forwarded-For` **no** lleva la IP del usuario: los puertos se publican en modo `ingress` de Swarm, que le cambia la IP de origen al pedido, y el proxy ve una IP interna de Docker. Para ver la IP real habría que publicar los puertos en modo `host`.
-- Deja pasar el **WebSocket** de la ejecución en vivo (US-9, US-10): reenvía los headers `Upgrade` y `Connection`, que piden pasar de HTTP a WebSocket, y espera hasta **10 minutos** sin mensajes (nginx trae 60 s). Snippet Service corta antes, a los 5 minutos sin un input. Ver **Ejecución en vivo** en [Decisiones técnicas](https://github.com/MartinaCousido/SnippetSearcher#decisiones-técnicas) de SnippetSearcher.
+- Deja pasar el **WebSocket** de la ejecución en vivo (US-9, US-10): reenvía los headers `Upgrade` y `Connection`, que piden pasar de HTTP a WebSocket, y espera hasta **10 minutos** sin mensajes (nginx trae 60 s). Snippet Service corta antes, a los 5 minutos sin un input. Ver **Ejecución en vivo** en [Decisiones técnicas](https://github.com/ingdesis/SnippetSearcher#decisiones-técnicas) de SnippetSearcher.
 - Acepta pedidos de hasta **5 MB** (`client_max_body_size`), para crear snippets desde un archivo (US-1). nginx trae 1 MB por defecto.
 - Si un servicio está caído, responde **502** o **504** con una página propia ([`nginx/errores/no-disponible.html`](nginx/errores/no-disponible.html)), y el resto sigue andando. Espera hasta 5 segundos para conectarse a un servicio (`proxy_connect_timeout`), en lugar de los 60 que trae nginx.
 - El puerto 80 solo atiende el desafío de Let's Encrypt y redirige todo lo demás a HTTPS (301). Ver [HTTPS](#https).
 - `nginx/default.conf` es una plantilla: al arrancar, nginx reemplaza `${DOMINIO}` por el dominio del ambiente.
 
-La decisión y el contrato completo están en [Contrato con la UI](https://github.com/MartinaCousido/SnippetSearcher#contrato-con-la-ui) de SnippetSearcher.
+La decisión y el contrato completo están en [Contrato con la UI](https://github.com/ingdesis/SnippetSearcher#contrato-con-la-ui) de SnippetSearcher.
 
 ### HTTPS
 
@@ -192,7 +192,7 @@ Si no se sube la versión, el deploy falla porque la config ya existe con otro c
 
 ## New Relic
 
-Observabilidad del sistema: la cátedra baja un servicio, en dev o en prod, y tenemos que enterarnos. Las decisiones están en **Observabilidad (New Relic)** de [Decisiones técnicas](https://github.com/MartinaCousido/SnippetSearcher#decisiones-técnicas) de SnippetSearcher.
+Observabilidad del sistema: la cátedra baja un servicio, en dev o en prod, y tenemos que enterarnos. Las decisiones están en **Observabilidad (New Relic)** de [Decisiones técnicas](https://github.com/ingdesis/SnippetSearcher#decisiones-técnicas) de SnippetSearcher.
 
 | Qué | Cómo llega a New Relic |
 |---|---|
@@ -220,7 +220,7 @@ Están escritos como código en [`newrelic/index.ts`](newrelic/index.ts), con **
 
 ## Auth0
 
-Auth0 hace el login y entrega los tokens que validan los servicios. Las decisiones están en las filas **Auth0** y **Roles y permisos** de [Decisiones técnicas](https://github.com/MartinaCousido/SnippetSearcher#decisiones-técnicas) de SnippetSearcher.
+Auth0 hace el login y entrega los tokens que validan los servicios. Las decisiones están en las filas **Auth0** y **Roles y permisos** de [Decisiones técnicas](https://github.com/ingdesis/SnippetSearcher#decisiones-técnicas) de SnippetSearcher.
 
 Los recursos de Auth0 no se crean a mano en el dashboard: están escritos como código en [`auth0/index.ts`](auth0/index.ts), con **Pulumi** (una herramienta que crea y actualiza recursos a partir de código). Sigue el `setup/` de la demo de la cátedra, [austral-ingsis/auth0-integration](https://github.com/austral-ingsis/auth0-integration). `npm run up` los crea igual cada vez, y si alguien los cambia en el dashboard, el siguiente `npm run up` los vuelve a dejar como dice el código.
 
@@ -338,11 +338,11 @@ A partir de ahí, todo lo que corre en la VM lo despliegan los workflows de GitH
 
 ## Levantar el sistema en local
 
-Este repo es para los ambientes desplegados. Para desarrollar en tu máquina a partir del código, seguí usando el `docker-compose.sistema.yml` del repo [SnippetSearcher](https://github.com/MartinaCousido/SnippetSearcher#cómo-levantarlo).
+Este repo es para los ambientes desplegados. Para desarrollar en tu máquina a partir del código, seguí usando el `docker-compose.sistema.yml` del repo [SnippetSearcher](https://github.com/ingdesis/SnippetSearcher#cómo-levantarlo).
 
 ## Flujo de trabajo
 
-Es el mismo en los tres repos. La versión completa (cómo se mergea y cómo están protegidas `dev` y `main`) está en el [Flujo de trabajo de SnippetSearcher](https://github.com/MartinaCousido/SnippetSearcher#flujo-de-trabajo), que es la fuente de verdad:
+Es el mismo en los tres repos. La versión completa (cómo se mergea y cómo están protegidas `dev` y `main`) está en el [Flujo de trabajo de SnippetSearcher](https://github.com/ingdesis/SnippetSearcher#flujo-de-trabajo), que es la fuente de verdad:
 
 ```
 feature/<descripcion>  ──PR──▶  dev  ──PR──▶  main
