@@ -56,8 +56,11 @@ services:
     networks:
       - snippet-net
     deploy:
+      # any, no on-failure: al apagar la VM, nginx termina bien (código 0) y con
+      # on-failure Swarm no lo vuelve a levantar al prenderla. Lo mismo en todos
+      # los servicios: ninguno es una tarea que termina.
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
   # Consigue y renueva el certificado de Let's Encrypt (ver certbot/certbot.sh).
@@ -79,7 +82,7 @@ services:
       - desafios-acme:/var/www/certbot
     deploy:
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
   # UI web (github.com/ingdesis/SnippetSearcher-ui). Sin puertos: se llega
@@ -91,7 +94,7 @@ services:
       - snippet-net
     deploy:
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
   snippet-service:
@@ -127,7 +130,7 @@ services:
       # Swarm no espera a que la base esté lista: si el servicio arranca
       # antes y falla, se reinicia hasta que conecta.
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
   permission-service:
@@ -148,7 +151,7 @@ services:
       - snippet-net
     deploy:
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
   printscript-service:
@@ -163,7 +166,7 @@ services:
       - snippet-net
     deploy:
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
   # Snippet Storage: guarda el código de los snippets como archivos.
@@ -189,7 +192,7 @@ services:
       start_period: 60s
     deploy:
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
   # El bucket: emula Azure Blob Storage. Solo lo usa el Asset Service.
@@ -259,7 +262,7 @@ services:
     deploy:
       mode: global
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 10s
 
 # Red interna del stack: los servicios se encuentran por nombre.
