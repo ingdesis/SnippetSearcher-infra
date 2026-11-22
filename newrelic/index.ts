@@ -144,7 +144,8 @@ for (const ambiente of ambientes) {
         status: estado,
         locationsPublics: [ubicaciones[0]],
         runtimeType: "NODE_API",
-        runtimeTypeVersion: "16.10",
+        // New Relic pasó los synthetics de Node 16 a Node 22 (Node 16 ya no tiene soporte).
+        runtimeTypeVersion: "22.23.4",
         scriptLanguage: "JAVASCRIPT",
         script: fs.readFileSync("synthetic-snippet.js", "utf8")
             .replaceAll("__BASE__", `${base}/api`)
